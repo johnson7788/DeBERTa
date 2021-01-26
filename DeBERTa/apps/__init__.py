@@ -1,1 +1,1 @@
-from .task_registry import tasks
+from .task_registry import * 

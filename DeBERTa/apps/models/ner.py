@@ -15,7 +15,7 @@ import torch
 import math
 from torch import nn
 from torch.nn import CrossEntropyLoss
-from ..deberta import DeBERTa,NNModule,ACT2FN,StableDropout
+from ...deberta import DeBERTa,NNModule,ACT2FN,StableDropout
 
 __all__ = ['NERModel']
 

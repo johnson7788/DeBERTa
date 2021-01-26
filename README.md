@@ -15,10 +15,15 @@ DeBERTa (Decoding-enhanced BERT with disentangled attention) improves the BERT a
 # Pre-trained Models
 
 Our pre-trained models are packaged into zipped files. You can download them from our [releasements](https://github.com/microsoft/DeBERTa/releases), or download an individual model via the links below:
-- [Large](https://github.com/microsoft/DeBERTa/releases/download/v0.1/large.zip): the pre-trained Large model
-- [Base](https://github.com/microsoft/DeBERTa/releases/download/v0.1/base.zip) : the pre-trained Base model
-- [Large MNLI](https://github.com/microsoft/DeBERTa/releases/download/v0.1/large_mnli.zip): Large model fine-tuned with MNLI task
-- [Base MNLI](https://github.com/microsoft/DeBERTa/releases/download/v0.1/base_mnli.zip): Base model fine-tuned with MNLI task
+- [**XXLarge V2**](https://huggingface.co/microsoft/deberta-xxlarge-v2): the pre-trained XLarge model(**1.5B**). This is the model(89.9) that surpassed **T5 11B(89.3) and human performance(89.8)** on **SuperGLUE** for the first time. 
+- [XLarge V2](https://huggingface.co/microsoft/deberta-xlarge-v2): the pre-trained XLarge model(900MB)
+- [XLarge](https://huggingface.co/microsoft/deberta-xlarge): the pre-trained XLarge model(750MB)
+- [XLarge MNLI](https://huggingface.co/microsoft/deberta-xlarge-mnli): the pre-trained XLarge model(750MB) fine-tuned with MNLI task
+- [XLarge](https://huggingface.co/microsoft/deberta-xlarge): the pre-trained XLarge model(750MB)
+- [Large](https://huggingface.co/microsoft/deberta-large): the pre-trained Large model
+- [Base](https://huggingface.co/microsoft/deberta-base) : the pre-trained Base model
+- [Large MNLI](https://huggingface.co/microsoft/deberta-large-mnli): Large model fine-tuned with MNLI task
+- [Base MNLI](https://huggingface.co/microsoft/deberta-base-mnli): Base model fine-tuned with MNLI task
 
 
 # Try the code
@@ -60,11 +65,11 @@ class MyModel(torch.nn.Module):
   def __init__(self):
     super().__init__()
     # Your existing model code
-    self.bert = deberta.DeBERTa(pre_trained='base') # Or 'large' or 'base_mnli' or 'large_mnli'
+    self.deberta = deberta.DeBERTa(pre_trained='base') # Or 'large' 'base-mnli' 'large-mnli' 'xlarge' 'xlarge-mnli' 'xlarge-v2' 'xxlarge-v2'
     # Your existing model code
     # do inilization as before
     # 
-    self.bert.apply_state() # Apply the pre-trained model of DeBERTa at the end of the constructor
+    self.deberta.apply_state() # Apply the pre-trained model of DeBERTa at the end of the constructor
     #
   def forward(self, input_ids):
     # The inputs to DeBERTa forward are
@@ -82,7 +87,8 @@ class MyModel(torch.nn.Module):
 
 # 2. Change your tokenizer with the the tokenizer built in DeBERta
 from DeBERTa import deberta
-tokenizer = deberta.GPT2Tokenizer()
+vocab_path, vocab_type = deberta.load_vocab(pretrained_id='base')
+tokenizer = deberta.tokenizers[vocab_type](vocab_path)
 # We apply the same schema of special tokens as BERT, e.g. [CLS], [SEP], [MASK]
 max_seq_len = 512
 tokens = tokenizer.tokenize('Examples input text of DeBERTa')
@@ -143,6 +149,8 @@ We report our numbers based on multple runs with different random seeds here. He
 
 |Task	 |Command	|Results	|Running Time(8x32G V100 GPUs)|
 |--------|---------------|---------------|-------------------------|
+|MNLI xxlarge v2|	`experiments/glue/mnli_xlarge.sh`|	**91.7/91.8** +/-0.1|	4h|
+|MNLI xlarge v2|	`experiments/glue/mnli_xlarge.sh`|	91.65/91.55 +/-0.1|	2.5h|
 |MNLI xlarge|	`experiments/glue/mnli_xlarge.sh`|	91.5/91.4 +/-0.1|	2.5h|
 |MNLI large|	`experiments/glue/mnli_large.sh`|	91.2/91.0 +/-0.1|	2.5h|
 |QQP large|	`experiments/glue/qqp_large.sh`|	92.3 +/-0.1|		6h|

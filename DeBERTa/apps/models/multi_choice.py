@@ -15,8 +15,8 @@ import torch
 from torch.nn import CrossEntropyLoss
 import math
 
-from ..deberta import *
-from ..utils import *
+from ...deberta import *
+from ...utils import *
 import pdb
 
 __all__ = ['MultiChoiceModel']

@@ -7,14 +7,14 @@ import pdb
 import random
 import torch
 import ujson as json
-from ..utils import xtqdm as tqdm
-from ..utils import get_logger
+from ...utils import xtqdm as tqdm
+from ...utils import get_logger
 
-from ..deberta import GPT2Tokenizer
-from .ner import NERModel
-from ..data import ExampleInstance, ExampleSet, DynamicDataset
-from ..data.example import *
-from ..data.example import _truncate_segments
+from ...deberta import GPT2Tokenizer
+from ..models import NERModel
+from ...data import ExampleInstance, ExampleSet, DynamicDataset
+from ...data.example import *
+from ...data.example import _truncate_segments
 from .task import EvalData, DataTask
 
 from seqeval import metrics as seq_metrics

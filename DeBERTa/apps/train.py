@@ -20,13 +20,14 @@ import math
 import torch
 import json
 from torch.utils.data import DataLoader
-from ..deberta import GPT2Tokenizer
+from ..deberta import tokenizers,load_vocab
 from ..utils import *
 from ..utils import xtqdm as tqdm
-from .task_registry import tasks
+from .task_registry import *
 
-from ..training import DistributedTrainer, initialize_distributed, batch_to, set_random_seed,kill_children
-from ..data import DistributedBatchSampler, SequentialSampler, BatchSampler, AsyncDataLoader
+import LASER
+from LASER.training import DistributedTrainer, initialize_distributed, batch_to, set_random_seed,kill_children
+from LASER.data import DistributedBatchSampler, SequentialSampler, BatchSampler, AsyncDataLoader
 
 def create_model(args, num_labels, model_class_fn):
   # Prepare model
@@ -38,6 +39,7 @@ def create_model(args, num_labels, model_class_fn):
   if args.fp16:
     model = model.half()
 
+  logger.info(f'Total parameters: {sum([p.numel() for p in model.parameters()])}')
   return model
 
 def train_model(args, model, device, train_data, eval_data):
@@ -58,7 +60,7 @@ def train_model(args, model, device, train_data, eval_data):
     _, loss = model(**data)
     return loss.mean(), data['input_ids'].size(0)
 
-  trainer = DistributedTrainer(args, model, device, data_fn, loss_fn = loss_fn, eval_fn = eval_fn, dump_interval = args.dump_interval)
+  trainer = DistributedTrainer(args, args.output_dir, model, device, data_fn, loss_fn = loss_fn, eval_fn = eval_fn, dump_interval = args.dump_interval)
   trainer.train()
 
 def merge_distributed(data_list, max_len=None):
@@ -191,31 +193,30 @@ def run_predict(args, model, device, eval_data, prefix=None):
     batch_sampler = DistributedBatchSampler(batch_sampler, rank=args.rank, world_size=args.world_size)
     eval_dataloader = DataLoader(eval_item.data, batch_sampler=batch_sampler, num_workers=args.workers)
     model.eval()
-    predicts=None
+    predicts = []
     for batch in tqdm(AsyncDataLoader(eval_dataloader), ncols=80, desc='Evaluating: {}'.format(prefix), disable=args.rank>0):
       batch = batch_to(batch, device)
       with torch.no_grad():
         logits, _ = model(**batch)
-      if args.world_size>1:
-        logits_all = [torch.zeros_like(logits) for _ in range(args.world_size)]
-        torch.distributed.all_gather(logits_all, logits)
-        torch.cuda.synchronize()
-        logits = torch.cat(logits_all)
-      logits = logits.detach().cpu().numpy()
-      if predicts is None:
-        predicts = np.copy(logits)
-      else:
-        predicts = np.append(predicts, logits, axis=0)
-  
-    predicts = predicts[:len(eval_item.data)]
+        predicts.append(logits)
+    predicts = merge_distributed(predicts, len(eval_item.data))
     if args.rank<=0:
-      output_test_file = os.path.join(args.output_dir, "test_logits_{}_{}.txt".format(name, prefix))
-      logger.info("***** Dump prediction results-{}-{} *****".format(name, prefix))
-      logger.info("Location: {}".format(output_test_file))
-      np.savetxt(output_test_file, predicts, delimiter='\t')
       predict_fn = eval_item.predict_fn
       if predict_fn:
-        predict_fn(predicts, args.output_dir, name, prefix)
+        if isinstance(predicts, Sequence):
+          for k,pred in enumerate(predicts):
+            output_test_file = os.path.join(args.output_dir, f"test_logits_{name}@{k}_{prefix}.txt")
+            logger.info(f"***** Dump prediction results-{name}@{k}-{prefix} *****")
+            logger.info("Location: {}".format(output_test_file))
+            pred = pred.detach().cpu().numpy()
+            np.savetxt(output_test_file, pred, delimiter='\t')
+            predict_fn(pred, args.output_dir, name + f'@{k}', prefix)
+        else:
+          output_test_file = os.path.join(args.output_dir, "test_logits_{}_{}.txt".format(name, prefix))
+          logger.info("***** Dump prediction results-{}-{} *****".format(name, prefix))
+          logger.info("Location: {}".format(output_test_file))
+          np.savetxt(output_test_file, predicts, delimiter='\t')
+          predict_fn(predicts, args.output_dir, name, prefix)
 
 def main(args):
   if not args.do_train and not args.do_eval and not args.do_predict:
@@ -226,19 +227,21 @@ def main(args):
   np.random.seed(args.seed)
   torch.manual_seed(args.seed)
 
-  tokenizer = GPT2Tokenizer()
-  processor = tasks[task_name](tokenizer = tokenizer, max_seq_len = args.max_seq_length, data_dir = args.data_dir)
-  label_list = processor.get_labels()
+  load_tasks()
+  vocab_path, vocab_type = load_vocab(vocab_path = args.tokenizer_model, vocab_type = args.tokenizer_type, pretrained_id = args.init_model)
+  tokenizer = tokenizers[vocab_type](vocab_path)
+  task = tasks[task_name](tokenizer = tokenizer, max_seq_len = args.max_seq_length, data_dir = args.data_dir)
+  label_list = task.get_labels()
 
-  eval_data = processor.eval_data(max_seq_len=args.max_seq_length)
+  eval_data = task.eval_data(max_seq_len=args.max_seq_length)
   logger.info("  Evaluation batch size = %d", args.eval_batch_size)
   if args.do_predict:
-    test_data = processor.test_data(max_seq_len=args.max_seq_length)
+    test_data = task.test_data(max_seq_len=args.max_seq_length)
     logger.info("  Prediction batch size = %d", args.predict_batch_size)
 
   if args.do_train:
-    train_data = processor.train_data(max_seq_len=args.max_seq_length, mask_gen = None, debug=args.debug)
-  model_class_fn = processor.get_model_class_fn()
+    train_data = task.train_data(max_seq_len=args.max_seq_length, mask_gen = None, debug=args.debug)
+  model_class_fn = task.get_model_class_fn()
   model = create_model(args, len(label_list), model_class_fn)
   if args.do_train:
     with open(os.path.join(args.output_dir, 'model_config.json'), 'w', encoding='utf-8') as fs:
@@ -258,7 +261,7 @@ def main(args):
     run_predict(args, model, device, test_data, prefix=args.tag)
 
 def build_argument_parser():
-  parser = argparse.ArgumentParser()
+  parser = argparse.ArgumentParser(parents=[LASER.optims.get_args(), LASER.training.get_args()])
 
   ## Required parameters
   parser.add_argument("--data_dir",
@@ -284,96 +287,31 @@ def build_argument_parser():
             help="The maximum total input sequence length after WordPiece tokenization. \n"
               "Sequences longer than this will be truncated, and sequences shorter \n"
               "than this will be padded.")
+
   parser.add_argument("--do_train",
             default=False,
             action='store_true',
             help="Whether to run training.")
+
   parser.add_argument("--do_eval",
             default=False,
             action='store_true',
             help="Whether to run eval on the dev set.")
+
   parser.add_argument("--do_predict",
             default=False,
             action='store_true',
             help="Whether to run prediction on the test set.")
-  parser.add_argument("--train_batch_size",
-            default=32,
-            type=int,
-            help="Total batch size for training.")
+
   parser.add_argument("--eval_batch_size",
             default=32,
             type=int,
             help="Total batch size for eval.")
+
   parser.add_argument("--predict_batch_size",
             default=32,
             type=int,
             help="Total batch size for prediction.")
-  parser.add_argument("--max_grad_norm",
-            default=1,
-            type=float,
-            help="The clip threshold of global gradient norm")
-  parser.add_argument("--learning_rate",
-            default=5e-5,
-            type=float,
-            help="The initial learning rate for Adam.")
-  parser.add_argument("--epsilon",
-            default=1e-6,
-            type=float,
-            help="epsilon setting for Adam.")
-  parser.add_argument("--adam_beta1",
-            default=0.9,
-            type=float,
-            help="The beta1 parameter for Adam.")
-  parser.add_argument("--adam_beta2",
-            default=0.999,
-            type=float,
-            help="The beta2 parameter for Adam.")
-  parser.add_argument("--num_train_epochs",
-            default=3.0,
-            type=float,
-            help="Total number of training epochs to perform.")
-  parser.add_argument("--warmup_proportion",
-            default=0.1,
-            type=float,
-            help="Proportion of training to perform linear learning rate warmup for. "
-              "E.g., 0.1 = 10%% of training.")
-  parser.add_argument("--lr_schedule_ends",
-            default=0,
-            type=float,
-            help="The ended learning rate scale for learning rate scheduling")
-  parser.add_argument("--lr_schedule",
-            default='warmup_linear',
-            type=str,
-            help="The learning rate scheduler used for traning. "
-              "E.g. warmup_linear, warmup_linear_shift, warmup_cosine, warmup_constant. Default, warmup_linear")
-
-  parser.add_argument("--local_rank",
-            type=int,
-            default=-1,
-            help="local_rank for distributed training on gpus")
-
-  parser.add_argument('--seed',
-            type=int,
-            default=1234,
-            help="random seed for initialization")
-
-  parser.add_argument('--accumulative_update',
-            type=int,
-            default=1,
-            help="Number of updates steps to accumulate before performing a backward/update pass.")
-
-  parser.add_argument('--fp16',
-            default=False,
-            type=boolean_string,
-            help="Whether to use 16-bit float precision instead of 32-bit")
-
-  parser.add_argument('--loss_scale',
-            type=float, default=256,
-            help='Loss scaling, positive power of 2 values can improve fp16 convergence.')
-
-  parser.add_argument('--scale_steps',
-            type=int, default=1000,
-            help='The steps to wait to increase the loss scale.')
 
   parser.add_argument('--init_model',
             type=str,
@@ -387,46 +325,11 @@ def build_argument_parser():
             type=float,
             default=None,
             help="The config file model initialization and fine tuning.")
-  parser.add_argument('--weight_decay',
-            type=float,
-            default=0.01,
-            help="The weight decay rate")
 
   parser.add_argument('--tag',
             type=str,
             default='final',
             help="The tag name of current prediction/runs.")
-
-  parser.add_argument("--dump_interval",
-            default=10000,
-            type=int,
-            help="Interval steps for generating checkpoint.")
-
-  parser.add_argument('--lookahead_k',
-            default=-1,
-            type=int,
-            help="lookahead k parameter")
-
-  parser.add_argument('--lookahead_alpha',
-            default=0.5,
-            type=float,
-            help="lookahead alpha parameter")
-
-  parser.add_argument('--with_radam',
-            default=False,
-            type=boolean_string,
-            help="whether to use RAdam")
-
-  parser.add_argument('--opt_type',
-            type=str.lower,
-            default='adam',
-            choices=['adam', 'admax'],
-            help="The optimizer to be used.")
-
-  parser.add_argument('--workers',
-            type=int,
-            default=2,
-            help="The workers to load data.")
 
   parser.add_argument('--debug',
             default=False,
@@ -437,6 +340,16 @@ def build_argument_parser():
             default=None,
             type=str,
             help="The path of pre-trained RoBERTa model")
+
+  parser.add_argument('--tokenizer_type',
+            default='gpt2',
+            type=str,
+            help="Tokenzier type: [spm, gpt2]")
+
+  parser.add_argument('--tokenizer_model',
+            default=None,
+            type=str,
+            help="The path of the tokenizer model")
   return parser
 
 if __name__ == "__main__":

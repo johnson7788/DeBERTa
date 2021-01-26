@@ -8,12 +8,12 @@ import csv
 import copy
 from collections import OrderedDict,defaultdict,Sequence,Counter
 import numpy as np
-import DeBERTa.utils as utils
-from DeBERTa.utils import xtqdm as tqdm
+from ...utils import get_logger
+from ...utils import xtqdm as tqdm
 from .metrics import *
 
-from .sequence_classification import SequenceClassificationModel
-logger=utils.get_logger()
+from ..models import SequenceClassificationModel
+logger=get_logger()
 
 __all__ = ['EvalData', 'DataTask']
 

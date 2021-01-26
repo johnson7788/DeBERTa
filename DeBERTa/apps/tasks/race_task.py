@@ -20,13 +20,13 @@ import re
 import ujson as json
 from .metrics import *
 from .task import EvalData, DataTask
-from DeBERTa.utils import xtqdm as tqdm
-from DeBERTa.data import ExampleInstance, ExampleSet, DynamicDataset,example_to_feature
-from DeBERTa.data.example import *
-import DeBERTa.utils as utils
-from .multi_choice import MultiChoiceModel
+from ...utils import xtqdm as tqdm
+from ...data import ExampleInstance, ExampleSet, DynamicDataset,example_to_feature
+from ...data.example import *
+from ...utils import get_logger
+from ..models.multi_choice import MultiChoiceModel
 
-logger=utils.get_logger()
+logger=get_logger()
 
 __all__ = ["RACETask"]
 

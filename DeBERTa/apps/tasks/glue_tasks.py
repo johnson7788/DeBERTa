@@ -24,16 +24,18 @@ import re
 import ujson as json
 from .metrics import *
 from .task import EvalData, DataTask
-from DeBERTa.utils import xtqdm as tqdm
-from DeBERTa.data import ExampleInstance, ExampleSet, DynamicDataset,example_to_feature
-from DeBERTa.data.example import _truncate_segments
-from DeBERTa.data.example import *
-import DeBERTa.utils as utils
+from ..task_registry import register_task
+from ...utils import xtqdm as tqdm
+from ...utils import get_logger
+from ...data import ExampleInstance, ExampleSet, DynamicDataset,example_to_feature
+from ...data.example import _truncate_segments
+from ...data.example import *
 
-logger=utils.get_logger()
+logger=get_logger()
 
 __all__ = ["MNLITask", "ANLITask", "STSBTask", "SST2Task", "QQPTask", "ColaTask", "MRPCTask", "RTETask", "QNLITask"]
 
+@register_task("sts-b")
 class STSBTask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -109,6 +111,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["1"]
 
+@register_task("rte")
 class RTETask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -199,6 +202,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["not_entailment", "entailment"]
 
+@register_task('mrpc')
 class MRPCTask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -275,6 +279,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["0", "1"]
 
+@register_task('qnli')
 class QNLITask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -350,6 +355,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["not_entailment", "entailment"]
 
+@register_task('cola')
 class ColaTask(DataTask):
   def __init__(self, data_dir, tokenizer, soft_threshold=0, with_dev_data=None, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -472,6 +478,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["0", "1"]
 
+@register_task('sst2')
 class SST2Task(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -537,6 +544,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["0", "1"]
 
+@register_task('qqp')
 class QQPTask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -601,6 +609,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["0", "1"]
 
+@register_task('mnli')
 class MNLITask(DataTask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     super().__init__(tokenizer, **kwargs)
@@ -709,6 +718,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     """See base class."""
     return ["contradiction", "neutral", "entailment"]
 
+@register_task('anli')
 class ANLITask(MNLITask):
   def __init__(self, data_dir, tokenizer, **kwargs):
     data_dir = data_dir.replace('/ANLI', '/MNLI')
