@@ -3,6 +3,9 @@
 This repository is the official implementation of [ **DeBERTa**: **D**ecoding-**e**nhanced **BERT** with Disentangled **A**ttention ](https://arxiv.org/abs/2006.03654)
 
 ## News
+### 1/29/2021
+DeBERTa v2 **900M, 1.5B** [model](https://huggingface.co/models?search=microsoft%2Fdeberta)&code released.
+
 ### 12/29/2020
 With DeBERTa 1.5B model, we surpass T5 11B model and human performance on SuperGLUE leaderboard. Code and model will be released soon. Please check out our paper for more details.
 
