@@ -17,7 +17,7 @@ DeBERTa (Decoding-enhanced BERT with disentangled attention) improves the BERT a
 
 # Pre-trained Models
 
-Our pre-trained models are packaged into zipped files. You can download them from our [releasements](https://github.com/microsoft/DeBERTa/releases), or download an individual model via the links below:
+Our pre-trained models are packaged into zipped files. You can download them from our [releases](https://huggingface.co/models?search=microsoft%2Fdeberta), or download an individual model via the links below:
 - [**XXLarge V2**](https://huggingface.co/microsoft/deberta-xxlarge-v2): the pre-trained XLarge model(**1.5B**). This is the model(89.9) that surpassed **T5 11B(89.3) and human performance(89.8)** on **SuperGLUE** for the first time. 
 - [XLarge V2](https://huggingface.co/microsoft/deberta-xlarge-v2): the pre-trained XLarge model(900MB)
 - [XLarge](https://huggingface.co/microsoft/deberta-xlarge): the pre-trained XLarge model(750MB)
