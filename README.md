@@ -93,7 +93,7 @@ class MyModel(torch.nn.Module):
     #   - If it's an attention mask then if will be torch.LongTensor of shape [batch_size, sequence_length, sequence_length]. 
     #      In this case, it's a mask indicate which tokens in the sequence should be attended by other tokens in the sequence. 
     # `output_all_encoded_layers`: whether to output results of all encoder layers, default, True
-    encoding = self.bert(input_ids)[-1]
+    encoding = deberta.bert(input_ids)[-1]
 
 # 2. Change your tokenizer with the the tokenizer built in DeBERta
 from DeBERTa import deberta
