@@ -11,7 +11,7 @@ DeBERTa v2 code and the **900M, 1.5B** [model](https://huggingface.co/models?sea
 - **nGiE(nGram Induced Input Encoding)** In v2 we use an additional convolution layer aside with the first transformer layer to better learn the local dependency of input tokens. We will add more ablation studies on this feature.
 - **Sharing position projection matrix with content projection matrix in attention layer** Based on our previous experiment, we found this can save parameters without affecting the performance.
 - **Apply bucket to encode relative postions** In v2 we use log bucket to encode relative positions similar to T5. 
-- **900M model & 1.5B model** In v2 we scale our model size to 900M and 1.5B which significantly improve the performance of downstream tasks.
+- **900M model & 1.5B model** In v2 we scale our model size to 900M and 1.5B which significantly improves the performance of downstream tasks.
 
 ### 12/29/2020
 With DeBERTa 1.5B model, we surpass T5 11B model and human performance on SuperGLUE leaderboard. Code and model will be released soon. Please check out our paper for more details.
