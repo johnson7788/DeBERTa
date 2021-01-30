@@ -157,25 +157,25 @@ python3 -m DeBERTa.apps.train --task_name $task --do_train  \
 Our fine-tuning experiments are carried on half a DGX-2 node with 8x32 V100 GPU cards, the results may vary due to different GPU models, drivers, CUDA SDK versions, using FP16 or FP32, and random seeds. 
 We report our numbers based on multple runs with different random seeds here. Here are the results from the Large model:
 
-|Task	 |Command	|Results	|Running Time(8x32G V100 GPUs)|
-|--------|---------------|---------------|-------------------------|
-|MNLI xxlarge v2|	`experiments/glue/mnli_xlarge.sh`|	**91.7/91.8** +/-0.1|	4h|
-|MNLI xlarge v2|	`experiments/glue/mnli_xlarge.sh`|	91.65/91.55 +/-0.1|	2.5h|
-|MNLI xlarge|	`experiments/glue/mnli_xlarge.sh`|	91.5/91.4 +/-0.1|	2.5h|
-|MNLI large|	`experiments/glue/mnli_large.sh`|	91.2/91.0 +/-0.1|	2.5h|
-|QQP large|	`experiments/glue/qqp_large.sh`|	92.3 +/-0.1|		6h|
-|QNLI large|	`experiments/glue/qnli_large.sh`|	95.3 +/-0.2|		2h|
-|MRPC large|	`experiments/glue/mrpc_large.sh`|	93.4 +/-0.5|		0.5h|
-|RTE large|	`experiments/glue/rte_large.sh`|	87.7 +/-1.0|		0.5h|
-|SST-2 large|	`experiments/glue/sst2_large.sh`|	96.7 +/-0.3|		1h|
-|STS-b large|	`experiments/glue/Stsb_large.sh`|	92.5 +/-0.3|		0.5h|
-|CoLA large|	`experiments/glue/cola_large.sh`|	70.5 +/-1.0|		0.5h|
+|Task	 |Parameters|Command	|Results	|Running Time(8x32G V100 GPUs)|
+|--------|--------|---------------|---------------|-------------------------|
+|MNLI xxlarge v2|**1.5B**|	`experiments/glue/mnli_xlarge.sh`|	**91.7/91.8** +/-0.1|	4h|
+|MNLI xlarge v2|**900M**|	`experiments/glue/mnli_xlarge.sh`|	91.65/91.55 +/-0.1|	2.5h|
+|MNLI xlarge|**750M**|	`experiments/glue/mnli_xlarge.sh`|	91.5/91.4 +/-0.1|	2.5h|
+|MNLI large|**380M**|	`experiments/glue/mnli_large.sh`|	91.2/91.0 +/-0.1|	2.5h|
+|QQP large|**380M**|	`experiments/glue/qqp_large.sh`|	92.3 +/-0.1|		6h|
+|QNLI large|**380M**|	`experiments/glue/qnli_large.sh`|	95.3 +/-0.2|		2h|
+|MRPC large|**380M**|	`experiments/glue/mrpc_large.sh`|	93.4 +/-0.5|		0.5h|
+|RTE large|**380M**|	`experiments/glue/rte_large.sh`|	87.7 +/-1.0|		0.5h|
+|SST-2 large|**380M**|	`experiments/glue/sst2_large.sh`|	96.7 +/-0.3|		1h|
+|STS-b large|**380M**|	`experiments/glue/Stsb_large.sh`|	92.5 +/-0.3|		0.5h|
+|CoLA large|**380M**|	`experiments/glue/cola_large.sh`|	70.5 +/-1.0|		0.5h|
 
 And here are the results from the Base model
 
-|Task	 |Command	|Results	|Running Time(8x32G V100 GPUs)|
-|--------|---------------|---------------|-------------------------|
-|MNLI base|	`experiments/glue/mnli_base.sh`|	88.8/88.5 +/-0.2|	1.5h|
+|Task	 |Parameters|Command	|Results	|Running Time(8x32G V100 GPUs)|
+|--------|--------|---------------|---------------|-------------------------|
+|MNLI base|**130M**|	`experiments/glue/mnli_base.sh`|	88.8/88.5 +/-0.2|	1.5h|
 
 ## Contacts
 
