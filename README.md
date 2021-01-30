@@ -4,7 +4,7 @@ This repository is the official implementation of [ **DeBERTa**: **D**ecoding-**
 
 ## News
 ### 1/29/2021
-DeBERTa v2 **900M, 1.5B** [model](https://huggingface.co/models?search=microsoft%2Fdeberta)&code released.
+DeBERTa v2 code and the **900M, 1.5B** [model](https://huggingface.co/models?search=microsoft%2Fdeberta) are here now. This includes the 1.5B model used for our SuperGLUE submission with single model and achieving 89.9, versus 89.8 human baseline. 
 
 ### 12/29/2020
 With DeBERTa 1.5B model, we surpass T5 11B model and human performance on SuperGLUE leaderboard. Code and model will be released soon. Please check out our paper for more details.
