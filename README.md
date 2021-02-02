@@ -1,29 +1,34 @@
-# DeBERTa: Decoding-enhanced BERT with Disentangled Attention
+# DeBERTa: Decoding-enhanced BERT with Disentangled Attention, 解码增强的解码注意力BERT
 
-This repository is the official implementation of [ **DeBERTa**: **D**ecoding-**e**nhanced **BERT** with Disentangled **A**ttention ](https://arxiv.org/abs/2006.03654)
+论文地址： [ **DeBERTa**: **D**ecoding-**e**nhanced **BERT** with Disentangled **A**ttention ](https://arxiv.org/abs/2006.03654)
 
 ## News
 ### 12/29/2020
-With DeBERTa 1.5B model, we surpass T5 11B model and human performance on SuperGLUE leaderboard. Code and model will be released soon. Please check out our paper for more details.
+使用DeBERTa 1.5B模型，我们在SuperGLUE排行榜上超越了T5 11B模型和人类表现。 代码和模型将很快发布。 请查看我们的论文以获取更多详细信息。
 
 ### 06/13/2020
-We released the pre-trained models, source code, and fine-tuning scripts to reproduce some of the experimental results in the paper. You can follow similar scripts to apply DeBERTa to your own experiments or applications. Pre-training scripts will be released in the next step. 
+我们发布了预训练的模型，源代码和微调脚本，以重现本文中的一些实验结果。 
+您可以按照类似的脚本将DeBERTa应用于您自己的实验或应用程序。 下一步将发布预训练脚本。 
+
 
 ## Introduction to DeBERTa 
-DeBERTa (Decoding-enhanced BERT with disentangled attention) improves the BERT and RoBERTa models using two novel techniques. The first is the disentangled attention mechanism, where each word is represented using two vectors that encode its content and position, respectively, and the attention weights among words are computed using disentangled matrices on their contents and relative positions. Second, an enhanced mask decoder is used to replace the output softmax layer to predict the masked tokens for model pretraining. We show that these two techniques significantly improve the efficiency of model pre-training and performance of downstream tasks.
+DeBERTa(注意力解耦的增强解码的BERT)使用两种新颖的技术改进了BERT和RoBERTa模型。
+首先是解耦的的注意力机制，其中每个单词分别使用两个编码其内容和位置的向量表示，
+单词间的注意力权重使用其内容和相对位置的解耦的矩阵来计算。 
+其次，增强的mask解码器用于替换输出softmax层，以预测用于模型预训练的mask token。 
+我们证明了这两种技术显着提高了模型预训练的效率和下游任务的性能。
 
 # Pre-trained Models
-
-Our pre-trained models are packaged into zipped files. You can download them from our [releasements](https://github.com/microsoft/DeBERTa/releases), or download an individual model via the links below:
+我们预训练的模型打包成压缩文件。 您可以从我们的[releasements](https://github.com/microsoft/DeBERTa/releases)下载它们，或通过以下链接下载单个模型：
 - [Large](https://github.com/microsoft/DeBERTa/releases/download/v0.1/large.zip): the pre-trained Large model
-- [Base](https://github.com/microsoft/DeBERTa/releases/download/v0.1/base.zip) : the pre-trained Base model
+- [Base](https://github.com/microsoft/DeBERTa/releases/download/v0.1.8/base.zip) : the pre-trained Base model
 - [Large MNLI](https://github.com/microsoft/DeBERTa/releases/download/v0.1/large_mnli.zip): Large model fine-tuned with MNLI task
 - [Base MNLI](https://github.com/microsoft/DeBERTa/releases/download/v0.1/base_mnli.zip): Base model fine-tuned with MNLI task
 
 
 # Try the code
 
-Read our [documentation](https://deberta.readthedocs.io/en/latest/)
+详细文档 [documentation](https://deberta.readthedocs.io/en/latest/)
 
 ## Requirements
 - Linux system, e.g. Ubuntu 18.04LTS
@@ -35,16 +40,19 @@ Read our [documentation](https://deberta.readthedocs.io/en/latest/)
 - docker (optional)
 - nvidia-docker2 (optional)
 
-There are several ways to try our code,
+可以使用以下几种方案使用模型
 ### Use docker
-Docker is the recommended way to run the code as we already built every dependency into the our docker [bagai/deberta](https://hub.docker.com/r/bagai/deberta) and you can follow the [docker official site](https://docs.docker.com/engine/install/ubuntu/) to install docker on your machine.
+提议使用Docker运行代码，因为我们已经在docker[bagai/deberta](https://hub.docker.com/r/bagai/deberta)中建立了每个依赖关系，
+您可以按照[docker official site](https://docs.docker.com/engine/install/ubuntu/)将docker安装到您的机器上。 
 
 To run with docker, make sure your system fullfil the requirements in the above list. Here are the steps to try the GLUE experiments: Pull the code, run `./run_docker.sh` 
 , and then you can run the bash commands under `/DeBERTa/experiments/glue/`
 
+要与docker一起运行，请确保您的系统满足上述列表中的要求。 以下是尝试GLUE实验的步骤：拉取代码，运行`./run_docker.sh`
+，然后可以在`/DeBERTa/experiments/glue/`下运行bash命令。 
 
 ### Use pip
-Pull the code and run `pip3 install -r requirements.txt` in the root directory of the code, then enter `experiments/glue/` folder of the code and try the bash commands under that folder for glue experiments.
+拉取代码并在代码的根目录中运行`pip3 install -r requirements.txt`，然后进入代码的`experiments/glue/`文件夹并尝试在该文件夹下的bash命令进行glue实验。 
 
 ### Install as a pip package
 `pip install deberta`
@@ -52,8 +60,8 @@ Pull the code and run `pip3 install -r requirements.txt` in the root directory o
 #### Use DeBERTa in existing code
 ``` Python
 
-# To apply DeBERTa into your existing code, you need to make two changes on your code,
-# 1. change your model to consume DeBERTa as the encoder
+# 要将DeBERTa应用于现有代码，您需要对代码进行两项更改， 
+# 1. 更改模型以使用DeBERTa作为编码器 
 from DeBERTa import deberta
 import torch
 class MyModel(torch.nn.Module):
@@ -61,34 +69,33 @@ class MyModel(torch.nn.Module):
     super().__init__()
     # Your existing model code
     self.bert = deberta.DeBERTa(pre_trained='base') # Or 'large' or 'base_mnli' or 'large_mnli'
-    # Your existing model code
     # do inilization as before
-    # 
-    self.bert.apply_state() # Apply the pre-trained model of DeBERTa at the end of the constructor
+    # 在构造函数的末尾应用DeBERTa的预训练模型, 就是加载预训练模型的参数
+    self.bert.apply_state() 
     #
   def forward(self, input_ids):
-    # The inputs to DeBERTa forward are
+    # DeBERTa前向输入输入为 
     # `input_ids`: a torch.LongTensor of shape [batch_size, sequence_length] with the word token indices in the vocabulary
     # `token_type_ids`: an optional torch.LongTensor of shape [batch_size, sequence_length] with the token types indices selected in [0, 1]. 
     #    Type 0 corresponds to a `sentence A` and type 1 corresponds to a `sentence B` token (see BERT paper for more details).
     # `attention_mask`: an optional parameter for input mask or attention mask. 
     #   - If it's an input mask, then it will be torch.LongTensor of shape [batch_size, sequence_length] with indices selected in [0, 1]. 
-    #      It's a mask to be used if the input sequence length is smaller than the max input sequence length in the current batch. 
-    #      It's the mask that we typically use for attention when a batch has varying length sentences.
+    #      如果输入序列长度小于当前批次中的最大输入序列长度，则使用此mask。 
+    #      当一批具有不同长度的句子时，用mask的注意力。 
     #   - If it's an attention mask then if will be torch.LongTensor of shape [batch_size, sequence_length, sequence_length]. 
     #      In this case, it's a mask indicate which tokens in the sequence should be attended by other tokens in the sequence. 
     # `output_all_encoded_layers`: whether to output results of all encoder layers, default, True
     encoding = self.bert(input_ids)[-1]
 
-# 2. Change your tokenizer with the the tokenizer built in DeBERta
+# 2. 更改tokenizer, 使用DeBERta内置的tokenizer 
 from DeBERTa import deberta
 tokenizer = deberta.GPT2Tokenizer()
-# We apply the same schema of special tokens as BERT, e.g. [CLS], [SEP], [MASK]
+# 我们应用与BERT相同的特殊token模式 , e.g. [CLS], [SEP], [MASK]
 max_seq_len = 512
 tokens = tokenizer.tokenize('Examples input text of DeBERTa')
-# Truncate long sequence
+#截断长序列
 tokens = tokens[:max_seq_len -2]
-# Add special tokens to the `tokens`
+#将特殊token添加到“token”中 
 tokens = ['[CLS]'] + tokens + ['[SEP]']
 input_ids = tokenizer.convert_tokens_to_ids(tokens)
 input_mask = [1]*len(input_ids)
@@ -133,13 +140,13 @@ python3 -m DeBERTa.apps.train --task_name $task --do_train  \
 ```
 
 ## Important Notes
-1. To run our code on multiple GPUs, you must `OMP_NUM_THREADS=1` before launch our training code
-2. By default we will cache the pre-trained model and tokenizer at `$HOME/.~DeBERTa`, you may need to clean it if the downloading failed unexpectedly.
+1. 要在多个GPU上运行我们的代码，在启动我们的训练代码之前，您必须设置环境变量`OMP_NUM_THREADS = 1` 
+2. 默认情况下，我们将在`$HOME/.~DeBERTa`中缓存经过预训练的模型和tokenizer，如果下载意外失败，则可能需要清除它。 
 
 
 ## Experiments
-Our fine-tuning experiments are carried on half a DGX-2 node with 8x32 V100 GPU cards, the results may vary due to different GPU models, drivers, CUDA SDK versions, using FP16 or FP32, and random seeds. 
-We report our numbers based on multple runs with different random seeds here. Here are the results from the Large model:
+我们的微调实验是在带有8x32 V100 GPU卡的DGX-2节点的上进行的，结果可能因GPU模型，驱动程序，使用FP16或FP32的CUDA SDK版本不同以及随机种子而异。 
+我们在这里根据具有不同随机种子的多次运行报告我们的数字。 以下是Large模型的结果：
 
 |Task	 |Command	|Results	|Running Time(8x32G V100 GPUs)|
 |--------|---------------|---------------|-------------------------|
@@ -153,7 +160,7 @@ We report our numbers based on multple runs with different random seeds here. He
 |STS-b large|	`experiments/glue/Stsb_large.sh`|	92.5 +/-0.3|		0.5h|
 |CoLA large|	`experiments/glue/cola_large.sh`|	70.5 +/-1.0|		0.5h|
 
-And here are the results from the Base model
+Base模型的结果
 
 |Task	 |Command	|Results	|Running Time(8x32G V100 GPUs)|
 |--------|---------------|---------------|-------------------------|
