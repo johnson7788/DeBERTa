@@ -48,7 +48,7 @@ def _setup_distributed_group(args):
   """Initialize torch.distributed."""
 
   torch.backends.cudnn.enabled = False
-  if args.world_size == 1:
+  if args.world_size == 1 or args.world_size == 0:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   else:
     set_logger(args.task_name, os.path.join(args.output_dir, f'training_{args.task_name}_{args.rank}.log'), rank=args.rank, verbose=1 if args.local_rank==0 else 0)

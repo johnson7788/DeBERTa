@@ -45,11 +45,8 @@ DeBERTa(注意力解耦的增强解码的BERT)使用两种新颖的技术改进�
 提议使用Docker运行代码，因为我们已经在docker[bagai/deberta](https://hub.docker.com/r/bagai/deberta)中建立了每个依赖关系，
 您可以按照[docker official site](https://docs.docker.com/engine/install/ubuntu/)将docker安装到您的机器上。 
 
-To run with docker, make sure your system fullfil the requirements in the above list. Here are the steps to try the GLUE experiments: Pull the code, run `./run_docker.sh` 
-, and then you can run the bash commands under `/DeBERTa/experiments/glue/`
-
-要与docker一起运行，请确保您的系统满足上述列表中的要求。 以下是尝试GLUE实验的步骤：拉取代码，运行`./run_docker.sh`
-，然后可以在`/DeBERTa/experiments/glue/`下运行bash命令。 
+要与docker一起运行，请确保您的系统满足上述列表中的要求。 以下是尝试GLUE实验的步骤：拉出代码，  运行 `./run_docker.sh` 
+，然后您可以在下面运行bash命令 `/DeBERTa/experiments/glue/`
 
 ### Use pip
 拉取代码并在代码的根目录中运行`pip3 install -r requirements.txt`，然后进入代码的`experiments/glue/`文件夹并尝试在该文件夹下的bash命令进行glue实验。 
@@ -115,9 +112,10 @@ For glue tasks,
 1. Get the data
 ``` bash
 cache_dir=/tmp/DeBERTa/
+#github链接已失效
 curl -J -L https://raw.githubusercontent.com/nyu-mll/jiant/master/scripts/download_glue_data.py | python3 - --data_dir $cache_dir/glue_tasks
+python3 utils/download_glue_data.py --data_dir cache_dir
 ```
-
 2. Run task
 
 ``` bash
@@ -138,6 +136,15 @@ python3 -m DeBERTa.apps.train --task_name $task --do_train  \
   --train_batch_size 32 \
   --max_seq_len 128
 ```
+
+#使用 python的 module运行
+```buildoutcfg
+cd /Users/admin/git/DeBERTa
+
+python -m DeBERTa.apps.train \
+--task_name STS-B --do_train --do_eval --do_predict --pre_trained output/base/pytorch.model.bin --model_config output/base/model_config.json --data_dir data/glue_tasks/STS-B --eval_batch_size 128 --bpe_vocab_file output/base/bpe_encoder.bin --predict_batch_size 128 --output_dir output/SST-B --scale_steps 250 --loss_scale 16384 --accumulative_update 1 --num_train_epochs 6 --warmup 100 --learning_rate 2e-5 --train_batch_size 32 --max_seq_len 128
+```
+
 
 ## Important Notes
 1. 要在多个GPU上运行我们的代码，在启动我们的训练代码之前，您必须设置环境变量`OMP_NUM_THREADS = 1` 

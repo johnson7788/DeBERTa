@@ -92,7 +92,7 @@ class NNModule(nn.Module):
       config = None
     model_config = None
     model_state = None
-    if model_path and model_path.strip() == '-' or model_path.strip()=='':
+    if model_path is None:
       model_path = None
     try:
       model_state, model_config = load_model_state(model_path, tag=tag, no_cache=no_cache, cache_dir=cache_dir)
@@ -110,14 +110,15 @@ class NNModule(nn.Module):
           model_config.__dict__[k] = config.__dict__[k]
     if model_config is not None:
       config = copy.copy(model_config)
-    vocab_size = config.vocab_size
+    # vocab_size = config.vocab_size
     # Instantiate model.
     model = cls(config, *inputs, **kwargs)
+    #如果预训练的模型存在，并且配置也存在，那么加载后会返回模型
     if not model_state:
       return model
     # copy state_dict so _load_from_state_dict can modify it
     state_dict = model_state.copy()
-
+    #否则，开始初始化模型，并返回模型
     missing_keys = []
     unexpected_keys = []
     error_msgs = []

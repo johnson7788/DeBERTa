@@ -225,8 +225,8 @@ def main(args):
   random.seed(args.seed)
   np.random.seed(args.seed)
   torch.manual_seed(args.seed)
-
-  tokenizer = GPT2Tokenizer()
+  #使用bpe的token方式
+  tokenizer = GPT2Tokenizer(vocab_file=args.bpe_vocab_file)
   processor = tasks[task_name](tokenizer = tokenizer, max_seq_len = args.max_seq_length, data_dir = args.data_dir)
   label_list = processor.get_labels()
 
@@ -240,19 +240,21 @@ def main(args):
     train_data = processor.train_data(max_seq_len=args.max_seq_length, mask_gen = None, debug=args.debug)
   model_class_fn = processor.get_model_class_fn()
   model = create_model(args, len(label_list), model_class_fn)
+  #如果是训练，还要保存下模型的配置
   if args.do_train:
     with open(os.path.join(args.output_dir, 'model_config.json'), 'w', encoding='utf-8') as fs:
       fs.write(model.config.to_json_string() + '\n')
-  logger.info("Model config {}".format(model.config))
+  logger.info("Model config 已经保存到输出目录: {}".format(model.config))
   device = initialize_distributed(args)
   if not isinstance(device, torch.device):
     return 0
   model.to(device)
-  if args.do_eval:
-    run_eval(args, model, device, eval_data, prefix=args.tag)
-
+  #先训练，在评估，最后预测
   if args.do_train:
     train_model(args, model, device, train_data, eval_data)
+
+  if args.do_eval:
+    run_eval(args, model, device, eval_data, prefix=args.tag)
 
   if args.do_predict:
     run_predict(args, model, device, test_data, prefix=args.tag)
@@ -377,11 +379,11 @@ def build_argument_parser():
 
   parser.add_argument('--init_model',
             type=str,
-            help="The model state file used to initialize the model weights.")
+            help="The model state file used to initialize the model weights. 或者是Deberta的预训练好的模型")
 
   parser.add_argument('--model_config',
             type=str,
-            help="The config file of bert model.")
+            help="The config file of bert model.或者是Deberta的皮遏制")
 
   parser.add_argument('--cls_drop_out',
             type=float,
@@ -395,7 +397,7 @@ def build_argument_parser():
   parser.add_argument('--tag',
             type=str,
             default='final',
-            help="The tag name of current prediction/runs.")
+            help="The tag name of current prediction/runs.,使用Deberta预训练模型的版本")
 
   parser.add_argument("--dump_interval",
             default=10000,
@@ -432,11 +434,18 @@ def build_argument_parser():
             default=False,
             type=boolean_string,
             help="Whether to cache cooked binary features")
-
   parser.add_argument('--pre_trained',
             default=None,
             type=str,
             help="The path of pre-trained RoBERTa model")
+  parser.add_argument('--world_size',
+            default=1,
+            type=str,
+            help="1代表不用分布式训练")
+  parser.add_argument('--bpe_vocab_file',
+            default=None,
+            type=str,
+            help="bpe的vocab 文件，如果为None，自动从https://api.github.com/repos/microsoft/DeBERTa/releases下载")
   return parser
 
 if __name__ == "__main__":
