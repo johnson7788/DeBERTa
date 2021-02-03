@@ -251,7 +251,7 @@ def main(args):
   model.to(device)
   #先训练，在评估，最后预测
   if args.do_train:
-    train_model(args, model, device, train_data, eval_data)
+    train_model(args, model, device, list(train_data), eval_data)
 
   if args.do_eval:
     run_eval(args, model, device, eval_data, prefix=args.tag)
