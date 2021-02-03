@@ -383,7 +383,7 @@ def build_argument_parser():
 
   parser.add_argument('--model_config',
             type=str,
-            help="The config file of bert model.或者是Deberta的皮遏制")
+            help="The config file of bert model.或者是Deberta的配置文件")
 
   parser.add_argument('--cls_drop_out',
             type=float,

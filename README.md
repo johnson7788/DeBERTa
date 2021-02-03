@@ -33,8 +33,8 @@ DeBERTa(注意力解耦的增强解码的BERT)使用两种新颖的技术改进�
 ## Requirements
 - Linux system, e.g. Ubuntu 18.04LTS
 - CUDA 10.0
-- pytorch 1.3.0
-- python 3.6
+- torch 1.6.0
+- python 3.8.3
 - bash shell 4.0
 - curl
 - docker (optional)

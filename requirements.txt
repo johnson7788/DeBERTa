@@ -4,11 +4,11 @@ numpy
 pytest
 regex
 scipy
-sklearn
+scikit-learn==0.23.1
 tqdm
 ujson
 seqeval
 psutil
 #GitPython
-torch
+torch==1.6.0
 #torchvision

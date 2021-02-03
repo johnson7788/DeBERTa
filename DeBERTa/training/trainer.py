@@ -86,7 +86,7 @@ class DistributedTrainer:
     self.training_epochs = int(getattr(args, 'num_train_epochs', 1))
 
     if training_steps is None:
-      training_steps = getattr(args, 'training_steps', (len(training_data) + self.args.train_batch_size-1)//self.args.train_batch_size*self.training_epochs)
+      training_steps = getattr(args, 'training_steps', (len(train_data) + self.args.train_batch_size-1)//self.args.train_batch_size*self.training_epochs)
     self.training_steps = training_steps
 
     self.init_fn = init_fn
